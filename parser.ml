@@ -9,7 +9,7 @@ let boa_min = Int64.of_int (-int_of_float(2.**62.));;
  * be a reserved word *)
 let valid_id_regex = Str.regexp "[a-zA-Z][a-zA-Z0-9]*"
 let number_regex = Str.regexp "^[-]?[0-9]+"
-let reserved_words = ["let"; "add1"; "sub1"; "isNum"; "isBool"; "if"]
+let reserved_words = ["let"; "add1"; "sub1"; "isNum"; "isBool"; "if"; "set"; "while"]
 let reserved_constants = ["true"; "false"; ]
 
 let check_reserved word = 
