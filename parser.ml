@@ -57,12 +57,15 @@ let rec parse (sexp : Sexp.t) : Expr.expr =
             ELet(parse_binding binding, parse_body body)
         | [Atom("if"); predicate; if_branch; else_branch] ->
             EIf(parse predicate, parse if_branch, parse else_branch)
-        | [Atom("set"); Atom(name); value] -> ESet(validID name, parse value)
+        | [Atom("set"); Atom(name); value] ->
+            ESet(validID name, parse value)
+        | Atom("while")::predicate::body ->
+            EWhile(parse predicate, parse_body body)
         | _ -> failwith "Parse error"
 
 and parse_body (expr_sequence : Sexp.t list) : Expr.expr list = 
   match expr_sequence with
-    | [] -> failwith "Parse error: let expression has no body"
+    | [] -> failwith "Parse error: empty body"
     | e_seq -> List.map (fun e -> parse e) e_seq
 
 and parse_binding (binding : Sexp.t) : (string * Expr.expr) list =

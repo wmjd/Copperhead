@@ -15,12 +15,20 @@ let check_overflow = IJo("overflow_check")
 let error_non_int = "error_non_int"
 let error_non_bool = "error_non_bool"
 
+(* saves and restores rax *)
+let check_bool si =
+  [IMov(stackloc si, Reg(RAX));
+  IAnd(Reg(RAX), Const(1));
+  ICmp(Reg(RAX), Const(0));
+  IJne(error_non_bool);
+  IMov(Reg(RAX), stackloc si);]
+
 let check_num = [IAnd(Reg(RAX), Const(1));
                  ICmp(Reg(RAX), Const(1));
                  IJne(error_non_int);]
 
 
-(* Assume arg1 is a register *)
+(* assume arg1 is a register *)
 let check_nums arg1 arg2 =
   [IAnd(arg1, arg2);
    IAnd(arg1, Const(1));
@@ -69,6 +77,7 @@ let rec well_formed_e (e : expr) (env : (string * int) list) : string list =
     match find env x with
     | None -> ["Variable identifier " ^ x ^ " unbound"] 
     | Some(_) -> [] ) @ well_formed_e e env 
+  | EWhile(predicate, body) -> (well_formed_e predicate env) @ (well_formed_body body env)
 
 
  (* TODO *)  
@@ -95,12 +104,7 @@ let rec compile_expr (e : expr) (si : int) (env : (string * int) list) : instruc
     | None -> failwith ("compile_expr: Unbound variable identifier " ^ x) (* this should be caught before compilation in check and should never execute here *)
     | Some(i) -> [IMov(Reg RAX, stackloc i)] )
   | EIf(predicate, then_expr,else_expr) ->
-    let test_bool =
-      [ IMov(stackloc si, Reg(RAX));
-        IAnd(Reg(RAX), Const(1));
-        ICmp(Reg(RAX), Const(0));
-        IJne(error_non_bool);
-        IMov(Reg(RAX), stackloc si);] in
+    let test_bool = check_bool si in
     let pred = compile_expr predicate si env in
     let then_branch = compile_expr then_expr si env in
     let else_branch = compile_expr else_expr si env in
@@ -119,7 +123,20 @@ let rec compile_expr (e : expr) (si : int) (env : (string * int) list) : instruc
     | None -> failwith ("compile_expr: Unbound variable identifier " ^ id) (* this should be caught before compilation in check and should never execute here *)
     | Some(i) -> let vis = compile_expr e si env in
       vis @ [IMov(stackloc i, Reg RAX)])
-
+  | EWhile(predicate, body) ->
+    let test_bool = check_bool si in
+    let pred_is = compile_expr predicate si env in
+    let body_is = compile_body body si env in   
+    let loop_pred_label = gen_temp "loop_pred" in
+    let after_loop_label = gen_temp "after_loop" in
+    [ ILabel(loop_pred_label)] @
+    pred_is @
+    test_bool @
+    [ ICmp(Reg(RAX), true_const);
+      IJne(after_loop_label);] @
+    body_is @
+    [ IJmp(loop_pred_label);
+      ILabel(after_loop_label);] 
 
 and compile_body expr_ls si env =
   let rec aux ls =
