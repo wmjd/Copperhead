@@ -17,6 +17,8 @@ let check_reserved word =
   then failwith ("Syntax error: " ^ word ^ " is a reserved word")
   else word    
 
+
+(* this is a bad function name, since its purpose and use is to verify valid numbers & identifiers, but keeping it for legacy reasons *)
 let int_of_string_opt s =
   if Str.string_match valid_id_regex s 0 then None else
   if Str.string_match number_regex s 0 then
@@ -24,6 +26,12 @@ let int_of_string_opt s =
     | Some(x) when x <= boa_max && x >= boa_min -> Some(x)
     | _ -> failwith "Non-representable number"
   else failwith "Invalid identifier"
+
+let validID name = match int_of_string_opt name with
+  | None -> name
+  | Some(_) -> failwith "Invalid identifier"
+
+
 
 let rec parse (sexp : Sexp.t) : Expr.expr =
   match sexp with
@@ -49,6 +57,7 @@ let rec parse (sexp : Sexp.t) : Expr.expr =
             ELet(parse_binding binding, parse_body body)
         | [Atom("if"); predicate; if_branch; else_branch] ->
             EIf(parse predicate, parse if_branch, parse else_branch)
+        | [Atom("set"); Atom(name); value] -> ESet(validID name, parse value)
         | _ -> failwith "Parse error"
 
 and parse_body (expr_sequence : Sexp.t list) : Expr.expr list = 

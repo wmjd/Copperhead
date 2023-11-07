@@ -65,6 +65,11 @@ let rec well_formed_e (e : expr) (env : (string * int) list) : string list =
   | EIf(predicate, if_branch, else_branch) -> (well_formed_e predicate env) @ (well_formed_e if_branch env) @ (well_formed_e else_branch env)
   | EPrim1(_ as op, arg1) -> (well_formed_e arg1 env)
   | EPrim2(_ as op, arg1, arg2) -> (well_formed_e arg1 env) @ (well_formed_e arg2 env)
+  | ESet(x, e) -> (
+    match find env x with
+    | None -> ["Variable identifier " ^ x ^ " unbound"] 
+    | Some(_) -> [] ) @ well_formed_e e env 
+
 
  (* TODO *)  
   | _ -> failwith "Not yet implemented: well_formed_e"
@@ -110,6 +115,11 @@ let rec compile_expr (e : expr) (si : int) (env : (string * int) list) : instruc
       ILabel(else_label);] @
     else_branch @
     [ILabel(end_label)]
+  | ESet(id, e) -> (match find env id with
+    | None -> failwith ("compile_expr: Unbound variable identifier " ^ id) (* this should be caught before compilation in check and should never execute here *)
+    | Some(i) -> let vis = compile_expr e si env in
+      vis @ [IMov(stackloc i, Reg RAX)])
+
 
 and compile_body expr_ls si env =
   let rec aux ls =
