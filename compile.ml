@@ -41,10 +41,11 @@ let false_const = HexConst(0x0000000000000000L)
 let tag_mask =    HexConst(0xFFFFFFFFFFFFFFFEL)
                 
 let rec well_formed_e (e : expr) (env : (string * int) list) : string list =
-  let rec ext_env b = 
+  let dummy_val = 42
+  in let rec ext_env b = 
     match b with
     | [] -> []
-    | (x, _)::more -> (x, 0)::(ext_env more)  
+    | (x, _)::more -> (x, dummy_val)::(ext_env more)  
   in let check_duplicates b =
     let rec dup b x =
       match b with
@@ -53,7 +54,7 @@ let rec well_formed_e (e : expr) (env : (string * int) list) : string list =
     in let rec walk b = 
       match b with 
       | [] -> []
-      | (x, v)::more -> (dup more x) @ (well_formed_e v env) @ (walk more) 
+      | (x, v)::more -> (dup more x) @ (well_formed_e v ((x, dummy_val)::env)) @ (walk more) 
     in walk b
   in let well_formed_body body env =
     let rec aux body =
@@ -79,9 +80,67 @@ let rec well_formed_e (e : expr) (env : (string * int) list) : string list =
     | Some(_) -> [] ) @ well_formed_e e env 
   | EWhile(predicate, body) -> (well_formed_e predicate env) @ (well_formed_body body env)
 
-
- (* TODO *)  
-  | _ -> failwith "Not yet implemented: well_formed_e"
+type typ = Num | Bool
+let rec tc (e : expr) (typ_env : (string * typ) list) : typ = 
+  let type_mismatch str = failwith ("Type mismatch " ^ str)
+  in let tc_prim2 op typ_env= 
+    match op with
+    | (Plus, e1, e2) | (Minus, e1, e2) | (Times, e1, e2) -> (
+      match (tc e1 typ_env, tc e2 typ_env) with
+      | (Num, Num) -> Num
+      | _ -> type_mismatch "prim2 arith")
+    | (Less, e1, e2) | (Greater, e1, e2) -> (
+      match (tc e1 typ_env, tc e2 typ_env) with
+      | (Num, Num) -> Bool
+      | _ -> type_mismatch "prim2 compare")
+    | (Equal, e1, e2) -> (
+      match (tc e1 typ_env, tc e2 typ_env) with
+      | (t1, t2) when t1 = t2 -> Bool
+      | _ -> type_mismatch "prim2 equal")
+  in let tc_prim1 op typ_env= 
+    match op with 
+	| (Add1, x) | (Sub1, x) -> (
+      match (tc x typ_env) with
+      | Num -> Num
+      | _ -> type_mismatch "num")
+   | (IsNum, x) | (IsBool, x) -> (
+      match (tc x typ_env) with
+      | _ -> Bool )
+  in let rec tc_body body env =
+    let rec aux body =
+      match body with
+      | [] -> failwith "tc_body Error: empty body (should have been detected in parsing)"
+      | [e] -> tc e env
+      | e::more -> let _ = tc e env in aux more
+    in aux body
+  in let rec ext_typ_env binding (env : (string * typ) list) = 
+    match binding with
+    | [] -> env
+    | (x, e)::more -> (ext_typ_env more ((x, tc e env)::env))
+  in match e with
+  | EPrim1(prim, arg1) -> tc_prim1 (prim, arg1)  typ_env
+  | EPrim2(prim, arg1, arg2) -> tc_prim2 (prim, arg1, arg2) typ_env
+  | EBool _ -> Bool
+  | ENumber _ -> Num
+  | EIf(pred, then_expr, else_expr) -> (
+    match (tc pred typ_env, tc then_expr typ_env, tc else_expr typ_env) with
+    | (Bool, t1, t2) when t1 = t2 -> t1
+    | _ -> type_mismatch "EIf")
+  | EId(x) -> (
+    match (find typ_env x) with
+    | Some(t) -> t
+    | _ -> type_mismatch "EId" )
+  | ESet(x, e) -> (
+    match (tc (EId x) typ_env, tc e typ_env) with
+    | (t1, t2) when t1 = t2 -> t1
+    | _ -> type_mismatch "ESet")
+  | EWhile(pred, body) -> (
+    match (tc pred typ_env, tc_body body typ_env) with
+    | Bool, t -> t
+    | _ -> type_mismatch "EWhile")
+  | ELet(binding, body) ->
+    let new_typ_env = ext_typ_env binding typ_env
+    in tc_body body new_typ_env
 
 let check (e : expr) : string list =
   match well_formed_e e [("input", -1)] with
@@ -242,6 +301,7 @@ and compile_prim2 op e1 e2 si env =
 
 let compile_to_string prog =
   let _ = check prog in
+  let _ = tc prog [] in
   let prelude = "  section .text\n" ^
                 "  extern error\n" ^
                 "  global our_code_starts_here\n" ^
