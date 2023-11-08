@@ -72,8 +72,8 @@ let rec well_formed_e (e : expr) (env : (string * int) list) : string list =
     | None -> ["Variable identifier " ^ x ^ " unbound"] 
     | Some(_) -> [] )
   | EIf(predicate, if_branch, else_branch) -> (well_formed_e predicate env) @ (well_formed_e if_branch env) @ (well_formed_e else_branch env)
-  | EPrim1(_ as op, arg1) -> (well_formed_e arg1 env)
-  | EPrim2(_ as op, arg1, arg2) -> (well_formed_e arg1 env) @ (well_formed_e arg2 env)
+  | EPrim1(_, arg1) -> (well_formed_e arg1 env)
+  | EPrim2(_, arg1, arg2) -> (well_formed_e arg1 env) @ (well_formed_e arg2 env)
   | ESet(x, e) -> (
     match find env x with
     | None -> ["Variable identifier " ^ x ^ " unbound"] 
