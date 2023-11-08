@@ -51,11 +51,11 @@ let rec well_formed_e (e : expr) (env : (string * int) list) : string list =
       match b with
       | [] -> []
       | (x_prime, v)::more -> if x_prime = x then ["Multiple bindings for variable identifier " ^ x ^ " "] else dup more x  
-    in let rec walk b = 
+    in let rec walk b env = 
       match b with 
       | [] -> []
-      | (x, v)::more -> (dup more x) @ (well_formed_e v ((x, dummy_val)::env)) @ (walk more) 
-    in walk b
+      | (x, v)::more -> (dup more x) @ (well_formed_e v env) @ (walk more ((x, dummy_val)::env)) 
+    in walk b env
   in let well_formed_body body env =
     let rec aux body =
       match body with
