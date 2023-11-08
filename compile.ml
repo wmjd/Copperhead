@@ -102,7 +102,7 @@ let rec tc (e : expr) (typ_env : (string * typ) list) : typ =
 	| (Add1, x) | (Sub1, x) -> (
       match (tc x typ_env) with
       | Num -> Num
-      | _ -> type_mismatch "num")
+      | _ -> type_mismatch "prim1 arith")
    | (IsNum, x) | (IsBool, x) -> (
       match (tc x typ_env) with
       | _ -> Bool )
