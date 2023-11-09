@@ -37,7 +37,7 @@ void error(int64_t error_code) {
   else if (error_code == 3)
     fprintf(stderr, "Error: overflow\n");
   else if (error_code == 4)
-    fprintf(stderr, "Error: input must be a boolean or a number\n");
+    fprintf(stderr, "Error: input must be a number\n");
   else if (error_code == 5)
     fprintf(stderr, "Error: input is not a representable number\n");
   exit(1);
@@ -53,9 +53,9 @@ int main(int argc, char** argv) {
 
   if (argc > 1) {
     if (!strcmp("true", argv[1])) {
-      input_val = TRUE;
+      error(4);
     } else if (!strcmp("false", argv[1])) {
-      input_val = FALSE;
+      error(4);
     } else {
       endptr = (char*) &argv[1];
       long r = strtol(argv[1], &endptr, 10);
@@ -68,7 +68,7 @@ int main(int argc, char** argv) {
       input_val = (r << 1) | 1;
     }
   } else {
-    input_val = FALSE;
+    input_val = 0;
   }
 
   // YOUR CODE ENDS HERE

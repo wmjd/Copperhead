@@ -301,7 +301,7 @@ and compile_prim2 op e1 e2 si env =
 
 let compile_to_string prog =
   let _ = check prog in
-  let _ = tc prog [] in
+  let _ = tc prog [("input", Num)] in
   let prelude = "  section .text\n" ^
                 "  extern error\n" ^
                 "  global our_code_starts_here\n" ^
