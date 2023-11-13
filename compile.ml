@@ -50,7 +50,7 @@ let rec well_formed_e (e : expr) (env : (string * int) list) : string list =
     let rec dup b x =
       match b with
       | [] -> []
-      | (x_prime, v)::more -> if x_prime = x then ["Multiple bindings for variable identifier " ^ x ^ " "] else dup more x  
+      | (x_prime, v)::more -> if x_prime = x then ["Multiple bindings for variable identifier " ^ x] else dup more x  
     in let rec walk b env = 
       match b with 
       | [] -> []
