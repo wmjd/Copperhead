@@ -15,4 +15,3 @@ error_non_int:
 error_non_bool:
   mov rdi, 2
   call error
-

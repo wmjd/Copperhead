@@ -6,7 +6,7 @@ our_code_starts_here:
 
   mov rax, 1
   mov [rsp + -16], rax
-temp_loop_pred_23:
+temp_loop_pred_17:
   mov rax, [rsp + -16]
   mov [rsp + -24], rax
   mov rax, 85
@@ -17,19 +17,19 @@ temp_loop_pred_23:
   jne near error_non_int
   mov rax, [rsp + -24]
   cmp rax, [rsp + -32]
-  jg near temp_greater_21
+  jg near temp_greater_15
   mov rax, 0
-  jmp near temp_end_22
-temp_greater_21:
+  jmp near temp_end_16
+temp_greater_15:
   mov rax, 0x2
-temp_end_22:
+temp_end_16:
   mov [rsp + -24], rax
   and rax, 1
   cmp rax, 0
   jne near error_non_bool
   mov rax, [rsp + -24]
   cmp rax, 0x2
-  jne near temp_after_loop_24
+  jne near temp_after_loop_18
   mov rax, [rsp + -16]
   mov [rsp + -24], rax
   and rax, 1
@@ -39,8 +39,8 @@ temp_end_22:
   add rax, 2
   jo near overflow_check
   mov [rsp + -16], rax
-  jmp near temp_loop_pred_23
-temp_after_loop_24:
+  jmp near temp_loop_pred_17
+temp_after_loop_18:
   mov rax, [rsp + -16]
   ret
 overflow_check:

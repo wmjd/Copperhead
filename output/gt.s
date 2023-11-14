@@ -14,12 +14,12 @@ our_code_starts_here:
   jne near error_non_int
   mov rax, [rsp + -16]
   cmp rax, [rsp + -24]
-  jg near temp_greater_15
+  jg near temp_greater_9
   mov rax, 0
-  jmp near temp_end_16
-temp_greater_15:
+  jmp near temp_end_10
+temp_greater_9:
   mov rax, 0x2
-temp_end_16:
+temp_end_10:
   ret
 overflow_check:
   mov rdi, 3

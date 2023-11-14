@@ -11,12 +11,12 @@ our_code_starts_here:
   jne near error_non_bool
   mov rax, [rsp + -16]
   cmp rax, 0x2
-  jne near temp_else_9
+  jne near temp_else_3
   mov rax, 3
-  jmp near temp_end_if_10
-temp_else_9:
+  jmp near temp_end_if_4
+temp_else_3:
   mov rax, -1
-temp_end_if_10:
+temp_end_if_4:
   ret
 overflow_check:
   mov rdi, 3
