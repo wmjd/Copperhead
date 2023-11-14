@@ -66,6 +66,7 @@ let myTestList =
 	t_file "lt" "lt.boa" "true";
 	t_file "loopx" "loopx.boa" "0";
 	t_file "loop42" "loop42.boa" "42";
-	t_i_file "fibonacci" "fibonacci.boa" "4" ["5"]
+	t_file "loop0" "loop0.boa" "0";
+	t_i_file "fibonacci" "fibonacci.boa" "5" ["4"]
   ]
 ;;
