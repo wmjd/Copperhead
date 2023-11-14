@@ -1,6 +1,6 @@
 (let ((a 0) (b 1)) 
 	(while (> input 0)
-		(sub1 input)
+		(set input (sub1 input))
 		(let ((temp a))
 			(set a b)
 			(set b (+ b temp))))

@@ -31,6 +31,7 @@ let t_parse name program expected =
 let f_to_s fname = Runner.string_of_file ("input/" ^ fname)
 let t_file name program expected = (t name (f_to_s program) expected);;
 let t_err_file name program expected = (t_err name (f_to_s program) expected);;
+let t_i_file name program expected args = (t_i name (f_to_s program) expected args)
 
 let myTestList =
   [ (* Fill in your tests here: *)
@@ -60,5 +61,11 @@ let myTestList =
 	t_err_file "well_form2" "well_form2.boa" "Multiple bindings for variable identifier y";
 	t_err_file "well_form_err" "well_form_err.boa" "Variable identifier x unbound";
 	t_err_file "wfbe" "wfbe.boa" "Variable identifier z unbound";
+	t_file "notgt" "notgt.boa" "false";
+	t_file "gt" "gt.boa" "true";
+	t_file "lt" "lt.boa" "true";
+	t_file "loopx" "loopx.boa" "0";
+	t_file "loop42" "loop42.boa" "42";
+	t_i_file "fibonacci" "fibonacci.boa" "4" ["5"]
   ]
 ;;
